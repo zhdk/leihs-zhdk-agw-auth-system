@@ -97,18 +97,22 @@ class AuthenticatorApp <  Sinatra::Base
         $config[:leihs_public_key], true, { algorithm: 'ES256' }
       login = sign_in_request.first["login"].presence
 
+      return_to = params[:'return-to']
+
       token = JWT.encode({
         sign_in_request_token: sign_in_request_token
         # and more if we ever need it
       }, $config[:my_private_key], 'ES256')
 
+      url_postlogin = CGI::escape("#{$config[:my_external_base_url]}/zhdk-agw/callback?" \
+                                  "token=#{token}" \
+                                  "&agw_session_id=%s")
+      url_postlogin += "&return_to=#{return_to}" if return_to.presence
+
       url = $config[:agw_base_url] + $config[:agw_app_id] \
         + '&delogin=1' \
         + (login ? "&vusername=#{CGI::escape(login)}" : "") \
-        + '&url_postlogin=' \
-        + CGI::escape("#{$config[:my_external_base_url]}/zhdk-agw/callback?" \
-                      "token=#{token}" \
-                      "&agw_session_id=%s") 
+        + "&url_postlogin=#{url_postlogin}"
 
       redirect url
 
@@ -138,6 +142,7 @@ class AuthenticatorApp <  Sinatra::Base
         $config[:leihs_public_key], true, { algorithm: 'ES256' }
 
       agw_session_id = params[:agw_session_id]
+      return_to = params[:return_to]
 
       url = $config[:agw_base_url] + $config[:agw_app_id] \
         + "/response" \
@@ -153,8 +158,8 @@ class AuthenticatorApp <  Sinatra::Base
         org_id: person[:id],
         success: true}, $config[:my_private_key], 'ES256')
 
-      url = sign_in_request.first["server_base_url"] \
-        + sign_in_request.first['path'] + "?token=#{token}"
+      url = sign_in_request.first["server_base_url"] + sign_in_request.first['path'] + "?token=#{token}"
+      url += "&return-to=#{return_to}" if return_to.presence
 
       redirect url
 
