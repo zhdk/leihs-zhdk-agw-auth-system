@@ -104,10 +104,12 @@ class AuthenticatorApp <  Sinatra::Base
         # and more if we ever need it
       }, $config[:my_private_key], 'ES256')
 
-      url_postlogin = CGI::escape("#{$config[:my_external_base_url]}/zhdk-agw/callback?" \
-                                  "token=#{token}" \
-                                  "&agw_session_id=%s")
+      url_postlogin =
+        "#{$config[:my_external_base_url]}/zhdk-agw/callback?" \
+        "token=#{token}" \
+        "&agw_session_id=%s"
       url_postlogin += "&return_to=#{return_to}" if return_to.presence
+      url_postlogin = CGI::escape(url_postlogin)
 
       url = $config[:agw_base_url] + $config[:agw_app_id] \
         + '&delogin=1' \
@@ -159,7 +161,7 @@ class AuthenticatorApp <  Sinatra::Base
         success: true}, $config[:my_private_key], 'ES256')
 
       url = sign_in_request.first["server_base_url"] + sign_in_request.first['path'] + "?token=#{token}"
-      url += "&return-to=#{return_to}" if return_to.presence
+      url += "&return-to=#{CGI::escape(return_to)}" if return_to.presence
 
       redirect url
 
