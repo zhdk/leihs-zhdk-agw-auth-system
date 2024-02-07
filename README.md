@@ -25,5 +25,5 @@ For the following scripts:
 ### Manual example
 
     source ./tmp/py-venv/bin/activate
-    ansible-playbook -i ../../zhdk-inventory/staging-hosts deploy_play.yml -l zhdk-leihs-staging
+    ansible-playbook -i ../../zhdk-inventory/staging-hosts deploy/deploy_play.yml -l zhdk-leihs-staging
 
